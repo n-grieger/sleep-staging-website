@@ -31,7 +31,8 @@ def preprocess(channel_data, sampling_rates, preprocessing_sampling_rate):
 
         data_new[i] = x
 
-    data = data_new.reshape([n_channels, -1, preprocessing_sampling_rate * 30]).transpose(1, 0, 2)
+    data = data_new.reshape([n_channels, -1, preprocessing_sampling_rate * 30]).transpose(1, 0, 2).astype('float32')
+    del data_new
 
     # normalization à la Defossez
     # shape should be (rec-len,2,preprocessing_sampling_rate*30) and we normalize over the first and last dimensions
@@ -39,8 +40,9 @@ def preprocess(channel_data, sampling_rates, preprocessing_sampling_rate):
     clamp_value = 20
 
     a, b, c = data.shape
-    reshaped_data = data.transpose(0, 2, 1).reshape(a * c, b)
-    scaled_data = robust_scaler.fit_transform(reshaped_data)
+    scaled_data = data.transpose(0, 2, 1).reshape(a * c, b)
+    del data
+    scaled_data = robust_scaler.fit_transform(scaled_data)
     scaled_data[scaled_data < -clamp_value] = -clamp_value
     scaled_data[scaled_data > clamp_value] = clamp_value
     scaled_data = scaled_data.reshape(a, c, b).transpose(0, 2, 1)
