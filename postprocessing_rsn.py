@@ -1,7 +1,8 @@
 import numpy as np
 
 
-def postprocess(labels: np.ndarray):
+def postprocess(labels):
+    labels = np.array(labels.to_py(), dtype='long')
     labels = labels.reshape([-1, 11])[:, 5]
     return labels
 

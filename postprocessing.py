@@ -1,7 +1,8 @@
 import numpy as np
 
 
-def postprocess(labels: np.ndarray):
+def postprocess(labels):
+    labels = np.array(labels.to_py(), dtype='long')
     return labels
 
 
