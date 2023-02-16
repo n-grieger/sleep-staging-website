@@ -1,5 +1,9 @@
 import numpy as np
 
+model_stages = {0: 'Wake', 1: 'N1', 2: 'N2', 3: 'N3', 4: 'REM'}
+output_stages = {0: 'Wake', 1: 'N1', 2: 'N2', 3: 'N3', 4: 'N3', 5: 'REM'}
+stage_to_output_map = {'Wake': 0, 'N1': 1, 'N2': 2, 'N3': 3, 'REM': 5}
+
 
 def softmax(x, axis=-1):
     return np.exp(x) / np.sum(np.exp(x), axis=axis, keepdims=True)
@@ -36,7 +40,9 @@ def postprocess(labels, probabilities, seq_len):
         # labels_out.append(predicted_labels_geo)
     except Exception as e:
         print(e)
-    return predicted_labels_geo
+
+    labels = np.array([stage_to_output_map[model_stages[lab]] for lab in predicted_labels_geo])
+    return labels
 
 
 # params are set in global context by webworker
