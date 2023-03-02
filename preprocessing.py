@@ -1,7 +1,6 @@
 import numpy as np
 from scipy.signal import butter as _butter
 from scipy.signal import sosfiltfilt as _sosfiltfilt, resample_poly
-from sklearn.preprocessing import RobustScaler
 
 
 def preprocess_record(data, sampling_rates, preprocessing_sampling_rate):
@@ -34,7 +33,7 @@ def preprocess_record(data, sampling_rates, preprocessing_sampling_rate):
 
     # normalization à la Defossez
     # shape should be (rec_len,2,preprocessing_sampling_rate*30) and we normalize over the first and last dimensions
-    robust_scaler = RobustScaler(unit_variance=True)
+    robust_scaler = RobustScaler()
     clamp_value = 20
 
     a, b, c = data.shape
