@@ -2,6 +2,30 @@ import numpy as np
 from scipy import stats
 
 
+def normalize_signal_IQR(signal, clip_value=None, clip_IQR=20, eps=1e-5):
+    if clip_value is not None:
+        clipped_signal = np.clip(signal, a_min=-clip_value, a_max=clip_value)
+    elif clip_IQR is not None:
+        s_low = np.percentile(signal, 50, axis=0, keepdims=True) - np.percentile(
+            signal, 25, axis=0, keepdims=True
+        )
+        s_high = np.percentile(signal, 75, axis=0, keepdims=True) - np.percentile(
+            signal, 50, axis=0, keepdims=True
+        )
+        clipped_signal = np.clip(signal, a_min=-2 * clip_IQR * s_low, a_max=2 * clip_IQR * s_high)
+
+    else:
+        clipped_signal = signal
+
+    mu = np.median(clipped_signal, axis=0, keepdims=True)
+    sigma = np.percentile(clipped_signal, 75, axis=0, keepdims=True) - np.percentile(
+        clipped_signal, 25, axis=0, keepdims=True
+    )
+    sigma[sigma == 0] = eps
+    signal = (clipped_signal - mu) / sigma
+    return signal
+
+
 def _handle_zeros_in_scale(scale, copy=True, constant_mask=None):
     """Set scales of near constant features to 1.
     The goal is to avoid division by very small or zero values.

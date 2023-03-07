@@ -19,13 +19,16 @@ def postprocess(labels, probabilities, seq_len):
 
         # aggregate labels and probabilities
         probabilities = softmax(probabilities)
+        # for p in probabilities.reshape([-1, 5]): print(p)
+        # return np.array(labels.to_py(), dtype='long').reshape([-1, seq_len])[:, half_seq_len]
+
         probabilities = probabilities.reshape([-1, seq_len, 5])
-        # predicted_labels_avg = np.zeros(probabilities.shape[0])
         predicted_labels_geo = np.zeros(probabilities.shape[0])
-        for i in range(probabilities.shape[0]):
+        # ignore first and last 30-half_seq_len epochs because of padding
+        for i in range(30 - half_seq_len, probabilities.shape[0] - (30 - half_seq_len)):
             pred_to_agg = []
             pred_to_agg += [probabilities[i - j, half_seq_len + j]
-                            for j in range(half_seq_len, 0)
+                            for j in range(half_seq_len, 0, -1)
                             if i - j >= 0]
             pred_to_agg += [probabilities[i, half_seq_len]]
             pred_to_agg += [probabilities[i + j + 1, half_seq_len - (1 + j)]
@@ -35,9 +38,9 @@ def postprocess(labels, probabilities, seq_len):
             # predicted_labels_avg[i] = np.argmax(np.array(pred_to_agg).mean(axis=0))
             # geometric average
             predicted_labels_geo[i] = np.argmax(np.exp(np.log(np.array(pred_to_agg)).mean(axis=0)))
-
-        # labels_out.append(predicted_labels_avg)
-        # labels_out.append(predicted_labels_geo)
+            # print(np.exp(np.log(np.array(pred_to_agg)).mean(axis=0)))
+        # remove first and last 30-half_seq_len epochs because of padding
+        predicted_labels_geo = predicted_labels_geo[30 - half_seq_len:-(30 - half_seq_len)]
     except Exception as e:
         print(e)
 
