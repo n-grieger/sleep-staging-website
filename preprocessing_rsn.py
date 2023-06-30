@@ -3,29 +3,24 @@ from scipy.signal import iirfilter, filtfilt
 from scipy.signal import resample_poly
 from scipy.signal import stft
 
-
-def preprocess_record(data, sampling_rates, preprocessing_sampling_rate):
-    # global data, sampling_rates, preprocessing_sampling_rate
-    data = np.array(data.to_py(), dtype='float32')
-    assert all([sampling_rates[0] == s for s in sampling_rates])
-    sampling_rate = sampling_rates[0]
+def preprocess_record(data, sample_rate, preprocessing_sampling_rate):
     n_channels = data.shape[0]
-    if (data.shape[1] / sampling_rate) % 30 != 0:
+    if (data.shape[1] / sample_rate) % 30 != 0:
         print(f'signal cannot be divided into 30s epochs, it will be shortened by '
-              f'{(data.shape[1] / sampling_rate) % 30} seconds')
-        data = data[:, :int(data.shape[1] / sampling_rate / 30) * sampling_rate * 30]
+              f'{(data.shape[1] / sample_rate) % 30} seconds')
+        data = data[:, :int(data.shape[1] / sample_rate / 30) * sample_rate * 30]
 
-    data_new = np.zeros((int(data.shape[1] / sampling_rate / 30), n_channels, preprocessing_sampling_rate * 30),
+    data_new = np.zeros((int(data.shape[1] / sample_rate / 30), n_channels, preprocessing_sampling_rate * 30),
                         dtype='float32')
     for i in range(n_channels):
         # first resample to 100Hz; Why? I don't know. (s. edf_to_h5.py l:215)
-        if not int(sampling_rate) == 100:
-            x = resample_poly(data[i], 100, int(sampling_rate))
+        if not int(sample_rate) == 100:
+            x = resample_poly(data[i], 100, int(sample_rate))
         else:
             x = data[i]
 
-        # bandpass_freqs = 2 * np.array([0.3, 35]) / sampling_rate
-        # bandpass_freqs = 2 * np.array([0.2, 30]) / sampling_rate  # FIXME make this adaptable
+        # bandpass_freqs = 2 * np.array([0.3, 35]) / sample_rate
+        # bandpass_freqs = 2 * np.array([0.2, 30]) / sample_rate  # FIXME make this adaptable
         # sos = _butter(4, bandpass_freqs, btype='band', output='sos').astype('float32')
         # x = _sosfiltfilt(sos, data[i], axis=-1, padtype='constant').astype('float32')
         b, a = iirfilter(
@@ -113,5 +108,5 @@ def preprocess_gen():
 
 
 # params are set in global context by webworker
-n_samples, data = preprocess_record(data, sampling_rates, preprocessing_sampling_rate)
+n_samples, data = preprocess_record(data_raw.copy(), sample_rate, preprocessing_sampling_rate)
 preprocess_gen()

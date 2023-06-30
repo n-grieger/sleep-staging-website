@@ -49,4 +49,30 @@ def postprocess(labels, probabilities, seq_len):
 
 
 # params are set in global context by webworker
-labels_out = postprocess(labels_in, probabilities_in, seq_len)
+sleepstages = postprocess(labels_in, probabilities_in, seq_len)
+
+del model_stages
+del output_stages
+del stage_to_output_map
+del softmax
+del postprocess
+if "labels_in" in globals(): del labels_in
+if "probabilities_in" in globals(): del probabilities_in
+if "seq_len" in globals(): del seq_len
+if "n_blocks" in globals(): del n_blocks
+if "n_samples" in globals(): del n_samples
+
+if "data" in globals(): del data
+if "preprocessing_sampling_rate" in globals(): del preprocessing_sampling_rate
+if "preprocess_record" in globals(): del preprocess_record
+if "standardize_online" in globals(): del standardize_online
+if "preprocess_gen" in globals(): del preprocess_gen
+if "iirfilter" in globals(): del iirfilter
+if "filtfilt" in globals(): del filtfilt
+if "resample_poly" in globals(): del resample_poly
+if "stft" in globals(): del stft
+
+if "stats" in globals(): del stats
+if "normalize_signal_IQR" in globals(): del normalize_signal_IQR
+if "_handle_zeros_in_scale" in globals(): del _handle_zeros_in_scale
+if "RobustScaler" in globals(): del RobustScaler
